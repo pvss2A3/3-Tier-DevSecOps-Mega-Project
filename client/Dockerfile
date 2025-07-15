@@ -1,32 +1,44 @@
 # Stage 1: Build React App
-FROM node:22-alpine AS builder
+#FROM node:22-alpine AS builder
 
-WORKDIR /app
+#WORKDIR /app
 
 # 🧠 Only copy dependency descriptors first to leverage Docker cache
-COPY package.json package-lock.json ./
+#COPY package.json package-lock.json ./
 
 # ⚡ Clean and fast install using lock file (CI-style)
-RUN npm ci
+#RUN npm ci
 
 # 📦 Now copy the rest of your app source
-COPY . .
+#COPY . .
 
 # 🏗️ Build the React app (generates static files in /build)
-RUN npm run build
+#RUN npm run build
 
 # Stage 2: Serve with Nginx
-FROM nginx:alpine
+#FROM nginx:alpine
 
 # 🚚 Copy built static files from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+#COPY --from=builder /app/build /usr/share/nginx/html
 
 # 🧾 Add custom nginx config (optional but usually required for SPA)
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+#COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # 🌐 Expose port 80 for HTTP
-EXPOSE 80
+#EXPOSE 80
 
 # 🚀 Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+#CMD ["nginx", "-g", "daemon off;"]
 
+# Build React App
+FROM node:18 AS builder
+WORKDIR /app
+COPY . .
+RUN npm install && npm run build
+
+# Serve with Nginx
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
